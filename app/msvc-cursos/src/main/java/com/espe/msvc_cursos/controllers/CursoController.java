@@ -1,4 +1,5 @@
 package com.espe.msvc_cursos.controllers;
+
 import com.espe.msvc_cursos.models.Usuario;
 import com.espe.msvc_cursos.models.entity.Curso;
 import com.espe.msvc_cursos.services.CursoService;
@@ -18,7 +19,7 @@ public class CursoController {
     private CursoService service;
 
     @GetMapping
-    public List<Curso> Listar() {
+    public List<Curso> listar() {
         return service.listar();
     }
 
@@ -33,55 +34,67 @@ public class CursoController {
 
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody Curso curso) {
-        return ResponseEntity.status (HttpStatus.CREATED).body(service.guardar (curso));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(curso));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@RequestBody Curso curso, @PathVariable Long id) {
         Optional<Curso> cursoOptional = service.porId(id);
-        if (cursoOptional.isPresent()){
+        if (cursoOptional.isPresent()) {
             Curso cursoDB = cursoOptional.get();
-            cursoDB.setNombre (curso.getNombre());
-            return ResponseEntity.status (HttpStatus.CREATED).body (service.guardar (cursoDB));
+            cursoDB.setNombre(curso.getNombre());
+            return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(cursoDB));
         }
         return ResponseEntity.notFound().build();
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar (@PathVariable Long id) {
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
         Optional<Curso> cursoOptional = service.porId(id);
-        if (cursoOptional.isPresent()){
+        if (cursoOptional.isPresent()) {
             service.eliminar(id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/asignar-usuario/{idCurso}")
-    public ResponseEntity<?> asignarUsuario(@RequestBody Usuario usuario, @PathVariable Long idCurso){
+    @PostMapping("/asignar-usuario/{idCurso}")
+    public ResponseEntity<?> agregarUsuarioACurso(@RequestBody Usuario usuario, @PathVariable Long idCurso) {
         try {
-            // Intenta agregar el usuario al curso
-            Optional<Usuario> o = service.agregarUsuario(usuario, idCurso);
-            if (o.isPresent()) {
-                // Si el usuario se agrega correctamente, devuelve 201 Created
-                return ResponseEntity.status(HttpStatus.CREATED).body(o.get());
+            Optional<Usuario> usuarioAgregado = service.agregarUsuarioACurso(usuario, idCurso);
+            if (usuarioAgregado.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(usuarioAgregado.get());
             } else {
-                // Si el usuario o el curso no existen, devuelve 404 Not Found
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Collections.singletonMap("mensaje", "Curso no encontrado o error al agregar el usuario"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("mensaje", "Error interno del servidor: " + e.getMessage()));
+        }
+    }
+
+    @PutMapping("/crear-asignar-usuario/{idCurso}")
+    public ResponseEntity<?> crearYAsignarUsuario(@RequestBody Usuario usuario, @PathVariable Long idCurso) {
+        try {
+            Optional<Usuario> usuarioCreado = service.crearUsuarioYAsignarACurso(usuario, idCurso);
+            if (usuarioCreado.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCreado.get());
+            } else {
                 return ResponseEntity.notFound().build();
             }
-        } catch (FeignException.NotFound e){
-            // Si Feign no encuentra el recurso (usuario o curso), devuelve 404 Not Found
+        } catch (FeignException.NotFound e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Collections.singletonMap("mensaje", "Recurso no encontrado: " + e.getMessage()));
         } catch (Exception e) {
-            // Para cualquier otro error, devuelve 500 Internal Server Error
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("mensaje", "Error interno del servidor: " + e.getMessage()));
         }
     }
 
     @DeleteMapping("/quitar-usuario/{idCurso}/{usuarioId}")
-    public ResponseEntity<?> quitarUsuario(@PathVariable Long idCurso, @PathVariable Long usuarioId){
-        boolean result = service.eliminarUsuario(usuarioId, idCurso);
+    public ResponseEntity<?> quitarUsuario(@PathVariable Long idCurso, @PathVariable Long usuarioId) {
+        boolean result = service.desasignarUsuarioDeCurso(usuarioId, idCurso);
         if (result) {
             return ResponseEntity.ok().body(Collections.singletonMap("mensaje", "Usuario eliminado del curso con éxito"));
         } else {

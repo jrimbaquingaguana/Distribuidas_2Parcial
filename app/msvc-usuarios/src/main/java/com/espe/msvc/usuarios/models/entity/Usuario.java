@@ -2,6 +2,8 @@ package com.espe.msvc.usuarios.models.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="usuarios")
@@ -21,8 +23,14 @@ public class Usuario {
     @NotEmpty
     private String password;
 
-    // Nuevo atributo cursoId
-    private Long cursoId;
+    @NotEmpty
+    private String tipo;
+
+    // Lista de IDs de cursos para referencia local, no se mapea a la base de datos directamente
+    @Transient
+    private List<Long> cursoIds = new ArrayList<>();
+
+    // Getters y setters
 
     public Long getId() {
         return id;
@@ -56,12 +64,29 @@ public class Usuario {
         this.password = password;
     }
 
-    // Métodos get y set para cursoId
-    public Long getCursoId() {
-        return cursoId;
+    public String getTipo() {
+        return tipo;
     }
 
-    public void setCursoId(Long cursoId) {
-        this.cursoId = cursoId;
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public List<Long> getCursoIds() {
+        return cursoIds;
+    }
+
+    public void setCursoIds(List<Long> cursoIds) {
+        this.cursoIds = cursoIds;
+    }
+
+    // Métodos de conveniencia para manejar IDs de cursos
+
+    public void addCursoId(Long cursoId) {
+        cursoIds.add(cursoId);
+    }
+
+    public void removeCursoId(Long cursoId) {
+        cursoIds.remove(cursoId);
     }
 }

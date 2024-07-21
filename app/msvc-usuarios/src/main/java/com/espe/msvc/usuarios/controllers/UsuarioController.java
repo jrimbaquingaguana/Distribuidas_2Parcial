@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -42,14 +43,6 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
     }
 
-    private static ResponseEntity<Map<String, String>> validar(BindingResult result) {
-        Map<String, String> errores = new HashMap<>();
-        result.getFieldErrors().forEach(err ->{
-            errores.put(err.getField(), "El campo " + err.getField() + " " + err.getDefaultMessage());
-        });
-        return ResponseEntity.badRequest().body(errores);
-    }
-
     @PutMapping("/editar/{id}")
     public ResponseEntity<Usuario> editar(@RequestBody Usuario usuario, @PathVariable Long id) {
         Optional<Usuario> usuarioOptional = service.porId(id);
@@ -58,19 +51,48 @@ public class UsuarioController {
             usuariodb.setNombre(usuario.getNombre());
             usuariodb.setEmail(usuario.getEmail());
             usuariodb.setPassword(usuario.getPassword());
-            usuariodb.setCursoId(usuario.getCursoId());
+            usuariodb.setTipo(usuario.getTipo());
+            usuariodb.setCursoIds(usuario.getCursoIds());
             return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(usuariodb));
         }
         return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
         Optional<Usuario> optionalUsuario = service.porId(id);
         if (optionalUsuario.isPresent()) {
             service.eliminar(id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/inscribir/{usuarioId}/{cursoId}")
+    public ResponseEntity<?> inscribirACurso(@PathVariable Long usuarioId, @PathVariable Long cursoId) {
+        Usuario usuario = service.inscribirACurso(usuarioId, cursoId);
+        if (usuario != null) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
+        } else {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("mensaje", "No se pudo inscribir al usuario en el curso"));
+        }
+    }
+
+    @DeleteMapping("/desinscribir/{usuarioId}/{cursoId}")
+    public ResponseEntity<?> desinscribirDeCurso(@PathVariable Long usuarioId, @PathVariable Long cursoId) {
+        Usuario usuario = service.desinscribirDeCurso(usuarioId, cursoId);
+        if (usuario != null) {
+            return ResponseEntity.ok().body(Collections.singletonMap("mensaje", "Usuario desinscrito del curso con éxito"));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("mensaje", "No se encontró la inscripción del usuario en el curso especificado"));
+        }
+    }
+
+    private static ResponseEntity<Map<String, String>> validar(BindingResult result) {
+        Map<String, String> errores = new HashMap<>();
+        result.getFieldErrors().forEach(err ->{
+            errores.put(err.getField(), "El campo " + err.getField() + " " + err.getDefaultMessage());
+        });
+        return ResponseEntity.badRequest().body(errores);
     }
 }

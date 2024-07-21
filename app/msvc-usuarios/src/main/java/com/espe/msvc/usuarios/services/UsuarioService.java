@@ -14,4 +14,8 @@ public interface UsuarioService {
     Usuario guardar(Usuario usuario);
 
     void eliminar(Long id);
+
+    Usuario inscribirACurso(Long usuarioId, Long cursoId);
+
+    Usuario desinscribirDeCurso(Long usuarioId, Long cursoId);
 }
