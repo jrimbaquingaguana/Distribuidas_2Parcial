@@ -1,4 +1,4 @@
-import { Route, RouterModule } from '@angular/router';
+import { Route } from '@angular/router';
 import { UsuarioListComponent } from './components/usuario-list/usuario-list.component';
 import { UsuarioDetailComponent } from './components/usuario-detail/usuario-detail.component';
 import { CursoListComponent } from './components/curso-list/curso-list.component';
@@ -11,5 +11,3 @@ export const routes: Route[] = [
   { path: 'cursos/:id', component: CursoDetailComponent },
   { path: '', redirectTo: '/cursos', pathMatch: 'full' }
 ];
-
-export const AppRoutingModule = RouterModule.forRoot(routes);

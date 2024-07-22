@@ -1,0 +1,20 @@
+<body>
+  <div class="header">
+    <h1>Sistema de Matriculación</h1>
+    <img src="https://cdn.discordapp.com/attachments/743685777388732479/1264820279494836305/tutor.png?ex=669f432d&is=669df1ad&hm=0e02c08db21a8c07da26c4479cd795fa2e4ed8b1a89278e4f68a6b4120c1d370&" alt="Logo" class="header-logo">
+  </div>
+  <div class="button-container">
+    <div class="nav-item" (click)="redirectToUsuarios()">
+      <img src="https://cdn.discordapp.com/attachments/743685777388732479/1264799344889040946/graduado.png?ex=669f2fae&is=669dde2e&hm=b27d3149a90084ebe11b9315bf32f74da66a09b8c9664aa83e86d3b9adc19650&" alt="Usuario" class="nav-image">
+      <span class="nav-text">Registro de Estudiantes</span>
+    </div>
+    <div class="nav-item" (click)="redirectToCursos()">
+      <img src="https://cdn.discordapp.com/attachments/743685777388732479/1264799717477449798/aprender-en-linea.png?ex=669f3007&is=669dde87&hm=609ee431dddc07726ecaf0fff0611c2df9f0e63705e859d6596ff63bc8ceedf2&" alt="Cursos" class="nav-image">
+      <span class="nav-text">Administración de Cursos</span>
+    </div>
+  </div>
+  <router-outlet></router-outlet>
+  <div class="footer">
+    <p>&copy; 2024 Mi Aplicación. Todos los derechos reservados.</p>
+  </div>
+</body>
